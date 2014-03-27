@@ -482,11 +482,18 @@ if ($user) {
 				}
 			}
 
+			var poked_faces = new Array();
+
 			function onPoke($data){
-				// var access_token=document.getElementById("access_token").value;
-        // var sendername=document.getElementById("sendername").value;
-        // status1 = document.getElementById('message').value;
-        // var facebookid = document.getElementsByName("facebookid");
+		
+				for (var i = 0; i < poked_faces.length; i ++){
+                   if (poked_faces[i] == $data){
+                       return;    
+                   }
+               }
+               poked_faces.push($data);
+
+
         var token    = localStorage.getItem("token"),
             postData = {
                 "message": "I am FaceBoculus-ing and would like to poke @" + $data.name + "!!!!",

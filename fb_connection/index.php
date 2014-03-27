@@ -19,12 +19,14 @@ if ($user) {
 
         echo '<ul>';
         foreach ($friends["data"] as $value) {
+          if (strpos($value["name"], "'") === false) {
             echo '<li>';
-            echo '<div class="pic"><a href="#" onclick="PostOnFriendsWall(\'' . $value["id"] . '\')">';
+            echo '<div class="pic"><a href="#" onclick="PostOnFriendsWall(\'' . $value["id"] . '\', \'' . $value["name"] . '\')">';
             echo '<img src="https://graph.facebook.com/' . $value["id"] . '/picture"/>';
             echo '</a></div>';
             echo '<div class="picName">'.$value["name"].'</div>'; 
             echo '</li>';
+          }
         }
         echo '</ul>';
 
@@ -72,77 +74,61 @@ if ($user) {
         });
       };
       
-      var token = "";
+      var token = {};
 
       function login() {
         FB.login(function(response) {
+          console.log(response);
+          localStorage.setItem("token", response.authResponse.accessToken);
          // handle the response
-         token = response.authResponse.accessToken;
+         // token = response.authResponse.accessToken;
          // grabFriends();
         }, {scope: 'user_status,friends_status,publish_actions'});
       }
 
-      
 
-        
-      
-
-      function poke(friendId) {
-          var opts = {
-                message : 'You\'ve been poked by me on FaceBoculus',
-                name : '',
-                link : 'http://www.paper-face.com/cttoronto/faceboculus',
-                description : 'FaceBoculus',
-                picture : 'http://paper-face.com/cttoronto/faceboculus/poke.jpg'
-            };
-
-            FB.api('/' + friendId + '/feed', 'post', opts, function(response)
-            {
-              console.log(response);
-                if (!response || response.error)
-                {
-                    alert('Posting error occured');
-                }
-                else
-                {
-                    alert('Success - Post ID: ' + response.id);
-                }
-            });
+       function logResponse(response) {
+        console.log(response);
+        if (response && !response.error) {
+          /* handle the result */
+          console.log("success");
+        } else {
+          console.log(response.error);
+        }
       }
 
-
-      function PostOnFriendsWall(friendId)
-      {
-
+       function PostOnFriendsWall (friendId, friendName) {
 
         // var access_token=document.getElementById("access_token").value;
         // var sendername=document.getElementById("sendername").value;
         // status1 = document.getElementById('message').value;
         // var facebookid = document.getElementsByName("facebookid");
+        var token    = localStorage.getItem("token"),
+            postData = {
+                "message": "I am FaceBoculus-ing and would like to poke @" + friendName + "!!!!",
+                // "access_token": token,
+                // "from": { "id": "<?=$user_profile["id"];?>", "name": "<?=$user_profile["name"];?>" },
+                // "to": { "name": friendName, "id": friendId },
+                // "message_tags": [{ "name": friendName, "id": friendId, "offset": 46, "length": friendName.length }],
+                "tags": friendId,
+                "picture": "http://paper-face.com/cttoronto/faceboculus/poke.jpg",
+                "caption": "POKE",
+                "description": "brought to you by FaceBoculus"
+                // "app_id": "<?php echo $facebook->getAppID() ?>"
+            };
+
+        console.log(token, token.id, postData);
+
         FB.api(
-          "/" + friendId + "/feed",
-          "POST",
-          {
-              
-                  "message": "You have been poked!!!!",
-                  "from": token.id,
-                  // "to": friendId,
-                  "picture": "http://paper-face.com/cttoronto/faceboculus/poke.jpg",
-                  "caption": "POKE",
-                  "description": "brought to you by FaceBoculus"
-              
-          },
-          function (response) {
-             console.log(response);
-            if (response && !response.error) {
-              /* handle the result */
-                 console.log("success");
-            }
-          }
-      );
+            // "/" + friendId + "/feed",
+            "/me/feed/",
+            "POST",
+            postData,   // object
+            logResponse // Callback function created just above this method
+        );
         
         // FB.api('/' + friendId + '/feed', 'POST', publish, function(response) {alert("posted");});
-    } 
+      } 
 
 
      (function() {

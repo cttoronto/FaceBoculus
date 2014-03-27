@@ -16,19 +16,29 @@ if ($user) {
     $user_profile = $facebook->api('/me');
     // $friends = $facebook->api('me/friends?fields=id,name&limit=5000');
     $friends = $facebook->api('/me/friends');
+    $PottersFriends = array();
+    foreach ($friends["data"] as $value) {
+      $PottersFriends[] = (object) array(
+          'name' =>$value['name'],
+          'id' =>$value['id'],
+          'picture' =>"http://graph.facebook.com/" . $value['id'] . "/picture"
+        );
+    }
 
-        echo '<ul>';
-        foreach ($friends["data"] as $value) {
-          if (strpos($value["name"], "'") === false) {
-            echo '<li>';
-            echo '<div class="pic"><a href="#" onclick="PostOnFriendsWall(\'' . $value["id"] . '\', \'' . $value["name"] . '\')">';
-            echo '<img src="https://graph.facebook.com/' . $value["id"] . '/picture"/>';
-            echo '</a></div>';
-            echo '<div class="picName">'.$value["name"].'</div>'; 
-            echo '</li>';
-          }
-        }
-        echo '</ul>';
+        // echo '<ul>';
+        // foreach ($friends["data"] as $value) {
+        //   if (strpos($value["name"], "'") === false) {
+        //     echo '<li>';
+        //     echo '<div class="pic"><a href="#" onclick="PostOnFriendsWall(\'' . $value["id"] . '\', \'' . $value["name"] . '\')">';
+        //     echo '<img src="https://graph.facebook.com/' . $value["id"] . '/picture"/>';
+        //     echo '</a></div>';
+        //     echo '<div class="picName">'.$value["name"].'</div>'; 
+        //     echo '</li>';
+        //   }
+        // }
+        // echo '</ul>';
+
+       
 
   } catch (FacebookApiException $e) {
     echo '<pre>'.htmlspecialchars(print_r($e, true)).'</pre>';
@@ -57,6 +67,9 @@ if ($user) {
     <div id="fb-root"></div>
     <script>
   
+
+      var persons = <?=json_encode($PottersFriends);?>;
+        
 
       window.fbAsyncInit = function() {
         FB.init({
@@ -97,7 +110,7 @@ if ($user) {
         }
       }
 
-       function PostOnFriendsWall (friendId, friendName) {
+       function PostOnFriendsWall (friend) {
 
         // var access_token=document.getElementById("access_token").value;
         // var sendername=document.getElementById("sendername").value;
@@ -105,19 +118,17 @@ if ($user) {
         // var facebookid = document.getElementsByName("facebookid");
         var token    = localStorage.getItem("token"),
             postData = {
-                "message": "I am FaceBoculus-ing and would like to poke @" + friendName + "!!!!",
+                "message": "I am FaceBoculus-ing and would like to poke @" + friend.name + "!!!!",
                 // "access_token": token,
                 // "from": { "id": "<?=$user_profile["id"];?>", "name": "<?=$user_profile["name"];?>" },
                 // "to": { "name": friendName, "id": friendId },
                 // "message_tags": [{ "name": friendName, "id": friendId, "offset": 46, "length": friendName.length }],
-                "tags": friendId,
+                "tags": friend.id,
                 "picture": "http://paper-face.com/cttoronto/faceboculus/poke.jpg",
                 "caption": "POKE",
                 "description": "brought to you by FaceBoculus"
                 // "app_id": "<?php echo $facebook->getAppID() ?>"
             };
-
-        console.log(token, token.id, postData);
 
         FB.api(
             // "/" + friendId + "/feed",

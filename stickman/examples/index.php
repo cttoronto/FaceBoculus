@@ -51,7 +51,7 @@ if ($user) {
 <html>
 	<head>
 		<meta charset="utf-8">
-		<title>NPVR Three.js Boxes Demo</title>
+		<title>FacebOculus</title>
 		<style>
 			html, body {
 				width: 100%;
@@ -79,6 +79,7 @@ if ($user) {
 				top: 0;
 				left: 0;
 			}
+			#login { position: fixed; z-index: 1000; }
 
 		</style>
 	</head>

@@ -14,14 +14,15 @@ if ($user) {
   try {
     // Proceed knowing you have a logged in user who's authenticated.
     $user_profile = $facebook->api('/me');
+    $limit = (isset($_GET['limit'])) ? $_GET['limit'] : 50;
     // $friends = $facebook->api('me/friends?fields=id,name&limit=5000');
-    $friends = $facebook->api('/me/friends');
+    $friends = $facebook->api('/me/friends?limit='.$limit);
     $PottersFriends = array();
     foreach ($friends["data"] as $value) {
       $PottersFriends[] = (object) array(
           'name' =>$value['name'],
           'id' =>$value['id'],
-          'image' =>"http://graph.facebook.com/" . $value['id'] . "/picture"
+          'image' =>"http://graph.facebook.com/" . $value['id'] . "/picture?height=200&type=normal&width=200"
         );
     }
 
@@ -188,7 +189,7 @@ if ($user) {
 			function init() {
 
 				camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 1000 );
-				camera.position.y = 100;
+				camera.position.y = 125;
 				scene = new THREE.Scene();
 				scene.fog = new THREE.Fog( 0xffffff, 0, 750 );
 

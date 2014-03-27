@@ -474,8 +474,9 @@ if ($user) {
 				
 				if ( collisions.length > 0 ) {
 					var distance = collisions[ 0 ].distance;
+					
 					//console.log(distance, collisions[0].object);
-					if ( distance > 0 && distance < 10 ) {
+					if ( distance > 0 && distance < 20 ) {
 						onPoke(collisions[0].object.data);
 					}
 				}
@@ -493,10 +494,10 @@ if ($user) {
 	                // "from": { "id": "<?=$user_profile["id"];?>", "name": "<?=$user_profile["name"];?>" },
 	                // "to": { "name": friendName, "id": friendId },
 	                // "message_tags": [{ "name": friendName, "id": friendId, "offset": 46, "length": friendName.length }],
-	                "tags": $data.id,
+	                // "tags": $data.id,
 	                "picture": "http://paper-face.com/cttoronto/faceboculus/poke.jpg",
 	                "caption": "POKE",
-	                "description": "brought to you by FaceBoculus"
+	                "description": "Brought to you by FaceBoculus and the Creative Technologists of Toronto"
 	                // "app_id": "<?php echo $facebook->getAppID() ?>"
 	            };
 

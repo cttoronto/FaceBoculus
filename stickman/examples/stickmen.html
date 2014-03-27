@@ -34,7 +34,11 @@
 		</style>
 	</head>
 	<body>
+		<script src="http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.5.2/underscore-min.js"></script>
+		<script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
 		<script src="../lib/vr.js"></script>
+		<script src="../lib/leap.js"></script>
 		<script src="../third_party/three.js/three.js"></script>
 		<script src="js/controls/OculusRiftControls.js"></script>
 		<script src="js/effects/OculusRiftEffect.js"></script>
@@ -156,6 +160,113 @@
 				document.addEventListener( 'keydown', keyPressed, false );
 				
 				populatePeople([{image:"texture.png"}, {image:"profile.jpg"}, {image:"profile.jpg"}, {image:"profile.jpg"}, {image:"profile.jpg"}]);
+
+				var fingers = {};
+  				var spheres = {};
+  				var controllerOptions = {enableGestures: true};
+
+  				Leap.loop(controllerOptions, function(frame) {
+
+				    var fingerIds = {};
+				    var handIds = {};
+
+				    //if (paused) return;
+
+				    if (frame.hands.length == 1){
+				    	var hand = frame.hands[0];
+
+				    	if (hand.fingers.length == 1){
+				    		
+						    for (var index = 0; index < frame.pointables.length; index++) {
+
+						      var pointable = frame.pointables[index];
+						      var finger = fingers[pointable.id];
+
+						      var pos = pointable.tipPosition;
+						      var dir = pointable.direction;
+
+						      var origin = new THREE.Vector3(camera.parent.position.x, camera.parent.position.y, camera.parent.position.z);
+						      var direction = new THREE.Vector3(dir[0], dir[1], dir[2]);
+
+						      if (!finger) {
+						        finger = new THREE.ArrowHelper(origin, direction, 40, 0xff0000);
+						        fingers[pointable.id] = finger;
+						        scene.add(finger);
+						      }
+
+						      finger.position = origin;
+						      finger.setDirection(direction);
+
+						      fingerIds[pointable.id] = true;
+						    }
+
+						    for (fingerId in fingers) {
+						      if (!fingerIds[fingerId]) {
+						        scene.remove(fingers[fingerId]);
+						        delete fingers[fingerId];
+						      }
+						    }
+
+						    if (frame.gestures && frame.gestures.length > 0) {
+			            		handleGesture(frame.gestures[0]);
+			        		}
+
+						    velocity = new THREE.Vector3();
+				    		moveXDelta = moveYDelta = moveZDelta = 0;
+
+						} else {
+
+							for (fingerId in fingers) {
+						      if (!fingerIds[fingerId]) {
+						        scene.remove(fingers[fingerId]);
+						        delete fingers[fingerId];
+						      }
+						    }
+				    	
+					    	// pitch is 
+					    		// forward (positive values) 
+					    		// backward (negative values)
+					    	moveForward = (hand.pitch() <= -0.3);
+					    	moveBackward = (hand.pitch() > 0.3);
+					    	velocity.z = (!moveForward && !moveBackward) ? 0 : velocity.z;
+					    	moveZDelta = (!moveForward && !moveBackward) ? 0 : hand.pitch() * 10;
+
+					    	// roll is 
+					    		// left (positive values
+					    		// right (negative values)
+					    	moveLeft = (hand.roll() >= 0.3);
+					    	moveRight = (hand.roll() < -0.3);
+					    	velocity.x = (!moveLeft && !moveRight) ? 0 : velocity.x;
+					    	moveXDelta = (!moveLeft && !moveRight) ? 0 : hand.roll() * 10;
+
+					    	moveUp = (hand.palmPosition[1] > 150);
+					    	moveDown = (hand.palmPosition[1] < 100);
+					    	velocity.y = (!moveUp && !moveDown) ? 0 : velocity.y;
+					    	moveYDelta = (!moveUp && !moveDown) ? 0 : 10 / Math.round((125 - hand.palmPosition[1], 2) + 0.003);
+					    }
+				    } else {
+				    	velocity = new THREE.Vector3();
+				    	moveXDelta = moveYDelta = moveZDelta = 0;
+				    }
+					
+				    //if(frame.gestures.length > 0) console.log(frame.gestures);
+
+				    renderer.render(scene, camera);
+				});
+
+				function handleGesture(gesture) {
+			
+				    switch(gesture.type){
+		        	   case "screenTap":
+							console.log("Screen tap: " + gesture.position);
+							console.log(fingers[gesture.pointableIds[0]].position);
+				            break;
+		       		     default:
+		           		    //console.log('detected unhandled gesture of type', gesture.type, gesture);
+		       		}
+				}  				
+
+
 			}
 
 			function onWindowResize() {

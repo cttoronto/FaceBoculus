@@ -17,6 +17,18 @@
  * @author benvanik
  */
 
+var moveForward = false;
+var moveBackward = false;
+var moveLeft = false;
+var moveRight = false;
+var moveUp = false;
+var moveDown = false;
+var moveYDelta = 0;
+var moveXDelta = 0;
+var moveZDelta = 0;
+
+var velocity;
+
 THREE.OculusRiftControls = function ( camera ) {
 
 	var scope = this;
@@ -25,15 +37,12 @@ THREE.OculusRiftControls = function ( camera ) {
 	moveObject.position.y = 10;
 	moveObject.add( camera );
 
-	var moveForward = false;
-	var moveBackward = false;
-	var moveLeft = false;
-	var moveRight = false;
+	
 
 	var isOnObject = false;
 	var canJump = false;
 
-	var velocity = new THREE.Vector3();
+	velocity = new THREE.Vector3();
 
 	var PI_2 = Math.PI / 2;
 
@@ -141,19 +150,26 @@ THREE.OculusRiftControls = function ( camera ) {
 	this.update = function ( delta, vrstate ) {
 
 		//if ( scope.enabled === false ) return;
-
 		delta *= 0.1;
 
 		velocity.x += ( - velocity.x ) * 0.08 * delta;
 		velocity.z += ( - velocity.z ) * 0.08 * delta;
+		velocity.y += ( - velocity.y ) * 0.08 * delta;
+		//velocity.y -= 0.10 * delta;
 
-		velocity.y -= 0.10 * delta;
+		//set upper limits for velocity
+		velocity.x = Math.min(velocity.x, 20);
+		velocity.z = Math.min(velocity.z, 20);
+		velocity.y = Math.min(velocity.y, 20);
 
-		if ( moveForward ) velocity.z -= this.moveSpeed * delta;
-		if ( moveBackward ) velocity.z += this.moveSpeed * delta;
+		if ( moveForward ) velocity.z -= this.moveSpeed * Math.abs(moveZDelta);
+		if ( moveBackward ) velocity.z += this.moveSpeed * Math.abs(moveZDelta);
 
-		if ( moveLeft ) velocity.x -= this.moveSpeed * delta;
-		if ( moveRight ) velocity.x += this.moveSpeed * delta;
+		if ( moveLeft ) velocity.x -= this.moveSpeed * Math.abs(moveXDelta);
+		if ( moveRight ) velocity.x += this.moveSpeed * Math.abs(moveXDelta);
+
+		if ( moveUp ) velocity.y += this.moveSpeed * Math.abs(moveYDelta);
+		if ( moveDown ) velocity.y -= this.moveSpeed * Math.abs(moveYDelta);
 
 		if ( isOnObject === true ) {
 
@@ -182,13 +198,35 @@ THREE.OculusRiftControls = function ( camera ) {
 		moveObject.translateZ( velocity.z );
 
 		if ( moveObject.position.y < 10 ) {
-
 			velocity.y = 0;
 			moveObject.position.y = 10;
-
 			canJump = true;
-
 		}
+		if ( moveObject.position.y > 350 ){
+			velocity.y = 0;
+			moveObject.position.y = 350;
+		}
+
+		if ( moveObject.position.x < -200 ) {
+			velocity.x = 0;
+			moveObject.position.x = -200;
+		}
+
+		if ( moveObject.position.x > 200 ) {
+			velocity.x = 0;
+			moveObject.position.x = 200;
+		}
+
+		if ( moveObject.position.z < -150 ) {
+			velocity.z = 0;
+			moveObject.position.z = -150;
+		}
+
+		if ( moveObject.position.z > 250 ) {
+			velocity.z = 0;
+			moveObject.position.z = 250;
+		}		
+
 
 	};
 

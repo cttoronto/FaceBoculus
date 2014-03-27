@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>NPVR Three.js Boxes Demo</title>
+		<style>
+			html, body {
+				width: 100%;
+				height: 100%;
+			}
+
+			body {
+				background-color: #ffffff;
+				margin: 0;
+				overflow: hidden;
+				font-family: arial;
+			}
+
+			#help {
+				position: absolute;
+				top: 800px;
+			}
+			#info {
+				position: absolute;
+				top: 820px;
+			}
+
+			canvas {
+				position: absolute;
+				top: 0;
+				left: 0;
+			}
+
+		</style>
+	</head>
+	<body>
+		<script src="../third_party/three.js/three.js"></script>
+		<script src="js/CTT/CTT_FBStickman.js"></script>
+
+    <div id="help">Move this window to your Rift (use the Windows key + arrows to get it there fast) then hit 'f' to make it fullscreen.</div>
+		<div id="info">IPD: <span id='ipd'>0</span> (+o/-p)</div>
+
+		<script>
+		(function() {
+			var camera, scene, renderer;
+			var geometry, material, mesh;
+			var time = Date.now();
+
+			var objects = [];
+
+			var ray;
+			var sphere;		
+			var plane_floor;
+			var test_plane;
+
+			function init() {
+
+				camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 1000 );
+				camera.position.y = 10;
+				scene = new THREE.Scene();
+				scene.fog = new THREE.Fog( 0xffffff, 0, 750 );
+
+				var light = new THREE.DirectionalLight( 0xffffff, 1.5 );
+				light.position.set( 1, 1, 1 );
+				scene.add( light );
+
+				var light = new THREE.DirectionalLight( 0xffffff, 0.75 );
+				light.position.set( -1, - 0.5, -1 );
+				scene.add( light );
+
+
+				// var cameraHelper = new THREE.CameraHelper(camera);
+				// scene.add(cameraHelper);
+
+				ray = new THREE.Raycaster();
+				ray.ray.direction.set( 0, -1, 0 );
+
+				// floor
+
+				geometry = new THREE.PlaneGeometry( 2000, 2000, 100, 100 );
+				geometry.applyMatrix( new THREE.Matrix4().makeRotationX( - Math.PI / 2 ) );
+
+				for ( var i = 0, l = geometry.vertices.length; i < l; i ++ ) {
+
+					var vertex = geometry.vertices[ i ];
+					vertex.x += Math.random() * 20 - 10;
+					vertex.y += Math.random() * 2;
+					vertex.z += Math.random() * 20 - 10;
+
+				}
+
+				for ( var i = 0, l = geometry.faces.length; i < l; i ++ ) {
+					var face = geometry.faces[ i ];
+					face.vertexColors[ 0 ] = new THREE.Color().setHSL( Math.random() * 0.2 + 0.5, 0.75, Math.random() * 0.25 + 0.75 );
+					face.vertexColors[ 1 ] = new THREE.Color().setHSL( Math.random() * 0.2 + 0.5, 0.75, Math.random() * 0.25 + 0.75 );
+					face.vertexColors[ 2 ] = new THREE.Color().setHSL( Math.random() * 0.2 + 0.5, 0.75, Math.random() * 0.25 + 0.75 );
+					face.vertexColors[ 3 ] = new THREE.Color().setHSL( Math.random() * 0.2 + 0.5, 0.75, Math.random() * 0.25 + 0.75 );
+
+				}
+
+				
+				material = new THREE.MeshBasicMaterial( { vertexColors: THREE.VertexColors } );
+material.side = THREE.DoubleSide;
+				plane_floor = new THREE.Mesh( geometry, material );
+				scene.add( plane_floor );
+				
+				geometry = new THREE.SphereGeometry(5,24,12);
+				sphere = new THREE.Mesh(geometry);
+				sphere.position = {x: 0, y: 20, z: -10};
+				scene.add(sphere);
+
+
+				geometry = new THREE.PlaneGeometry( 10, 10, 1, 1 );
+				material = new THREE.MeshBasicMaterial( { 
+					color: 0xf0f000, 
+					shading: THREE.FlatShading,
+					vertexColors: THREE.VertexColors 
+				});
+				test_plane = new THREE.Mesh(geometry, material);
+				scene.add(test_plane);
+				test_plane.position = {x: 0, y: 20, z: -50};
+
+				renderer = new THREE.WebGLRenderer({
+					devicePixelRatio: 1,
+					alpha: false,
+					clearColor: 0xffffff,
+					antialias: true
+				});
+				
+				
+
+				renderer.setSize( window.innerWidth, window.innerHeight );
+
+				document.body.appendChild( renderer.domElement );
+
+				window.addEventListener( 'resize', onWindowResize, false );
+				document.addEventListener( 'keydown', keyPressed, false );
+			}
+			
+			init();
+			animate();
+			function onWindowResize() {
+				renderer.setSize( window.innerWidth, window.innerHeight );
+			}
+
+			function keyPressed (event) {
+			}
+
+			function render() {
+				
+				renderer.render( scene, camera );
+			}
+			function animate() {
+
+				time = Date.now();
+				
+				requestAnimationFrame( animate );
+
+				render();
+				
+				/*-----------------------------------*/	
+				var collide_ray = new THREE.Raycaster(sphere.position);
+				collide_ray.ray.direction.set( 0, 0, -1 );
+
+				var collisions = collide_ray.intersectObjects( [test_plane] );
+				
+				if ( collisions.length > 0 ) {
+					var distance = collisions[ 0 ].distance;
+					
+						console.log(distance, collisions[0].object);
+					if ( distance > 0 && distance < 10 ) {
+					}
+				}
+//				sphere.position.x-= 0.1;
+				sphere.position.z-= 0.1;
+//				camera.position.z += 0.1;
+			}
+		})();
+		</script>
+	</body>
+</html>

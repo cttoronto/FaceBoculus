@@ -44,12 +44,13 @@ var CTT_FBStickman = function($facepath, $color){
 				geometry = new THREE.PlaneGeometry(30,30,1,1);
 				material = new THREE.MeshLambertMaterial({ map: THREE.ImageUtils.loadTexture($facepath) });
 				material.side = THREE.DoubleSide;
-				var face = new THREE.Mesh(geometry, material);
-				this.stickman.add(face);
-				face.position = {x: 0, y: 137, z: 0};
-				
+				this.face = new THREE.Mesh(geometry, material);
+				this.stickman.add(this.face);
+				this.face.position = {x: 0, y: 137, z: 0};
 }
 CTT_FBStickman.prototype.model = function(){
-	console.log(this.stickman);
 	return this.stickman;
+}
+CTT_FBStickman.prototype.facemesh = function(){
+	return this.face;
 }

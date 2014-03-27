@@ -51,13 +51,14 @@
 
 			var effect; // rift effect
 
-			var objects = [];
+			var object_faces = new Array();
 
 			var ray;
 			var person;
 			var sphere;
 			
 			var plane_floor;
+
 			
 			if (!vr.isInstalled()) {
 				//statusEl.innerText = 'NPVR plugin not installed!';
@@ -134,12 +135,14 @@
 				sphere = new THREE.Mesh(geometry);
 				scene.add(sphere);
 				
-				for (var i = 0; i < 5; i ++){	
+				for (var i = 0; i < 10; i ++){	
 					person = new CTT_FBStickman();
 					scene.add(person.model());
 					person.model().position.x = Math.random()*1000-500;
 					person.model().rotation.y = Math.random()*360 *Math.PI/180;
 					person.model().position.z = Math.random()*1000-500;
+					//alert(person.face());
+					object_faces.push(person.facemesh());
 				}
 				renderer = new THREE.WebGLRenderer({
 					devicePixelRatio: 1,
@@ -204,7 +207,7 @@
 				ray.ray.origin.copy( controls.getObject().position );
 				ray.ray.origin.y -= 10;
 
-				var intersections = ray.intersectObjects( objects );
+				var intersections = ray.intersectObjects( object_faces );
 				if ( intersections.length > 0 ) {
 					var distance = intersections[ 0 ].distance;
 					if ( distance > 0 && distance < 10 ) {
@@ -220,22 +223,21 @@
 				effect.render( scene, camera, polled ? vrstate : null );
 
 				time = Date.now();
-				
-				
-				
-				/*-----------------------------------*/
-				var vector = new THREE.Vector3( sphere.postion);	
-				var collide_ray = new THREE.Raycaster(sphere.position, vector.sub( sphere.position ).normalize());
-//				collide_ray.ray.direction.set( 0, 0, 0 );
-//				collide_ray.ray.origin.copy( sphere.position );
-				
-				var collisions = collide_ray.intersectObjects( [plane_floor] );
+//				sphere.position = controls.getObject().position.clone();
+//				sphere.position.z -= 10;
+				var collide_ray = new THREE.Raycaster(sphere.position);
+				collide_ray.ray.direction.set( 0, 0, -1 );
+
+				var collisions = collide_ray.intersectObjects( object_faces );
 				
 				if ( collisions.length > 0 ) {
 					var distance = collisions[ 0 ].distance;
+					
+					console.log(distance, collisions[0].object);
 					if ( distance > 0 && distance < 10 ) {
 					}
 				}
+				/**/
 			}
 		})();
 		</script>

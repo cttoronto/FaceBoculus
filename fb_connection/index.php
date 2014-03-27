@@ -20,7 +20,7 @@ if ($user) {
         echo '<ul>';
         foreach ($friends["data"] as $value) {
             echo '<li>';
-            echo '<div class="pic"><a href="#" onclick="poke(\'' . $value["id"] . '\')">';
+            echo '<div class="pic"><a href="#" onclick="PostOnFriendsWall(\'' . $value["id"] . '\')">';
             echo '<img src="https://graph.facebook.com/' . $value["id"] . '/picture"/>';
             echo '</a></div>';
             echo '<div class="picName">'.$value["name"].'</div>'; 
@@ -71,46 +71,21 @@ if ($user) {
           window.location.reload();
         });
       };
-      (function() {
-        var e = document.createElement('script'); e.async = true;
-        e.src = document.location.protocol +
-          '//connect.facebook.net/en_US/all.js';
-        document.getElementById('fb-root').appendChild(e);
-      }());
-
+      
+      var token = "";
 
       function login() {
         FB.login(function(response) {
          // handle the response
-         grabFriends();
-        }, {scope: 'basic_info,user_photos,friends_photos,user_status,friends_status,read_friendlists,publish_actions,publish_stream'});
+         token = response.authResponse.accessToken;
+         // grabFriends();
+        }, {scope: 'user_status,friends_status,publish_actions'});
       }
-
-      function grabFriends() {
-        FB.api('/me/friends', { fields: 'id, name', limit: 3 },  function(response) 
-        {
-           if (response.error) 
-           {
-               alert(JSON.stringify(response.error));
-           } 
-           else 
-           {    
-               // alert("Loading friends...");
-               console.log("fdata: " + response.data);
-               response.data.forEach(function(item) 
-               {           
-                  document.getElementById('friends').innerHTML+='<image src="https://graph.facebook.com/'+item['id']+'/picture?type=large&return_ssl_results=1" />'; 
-                  document.getElementById('friends').innerHTML+='<br />'+item['name']+'';          
-               });
-           }
-
-
-    });
 
       
 
         
-      }
+      
 
       function poke(friendId) {
           var opts = {
@@ -118,11 +93,12 @@ if ($user) {
                 name : '',
                 link : 'http://www.paper-face.com/cttoronto/faceboculus',
                 description : 'FaceBoculus',
-                picture : 'http://paper-face.com/cttoronto/faceboculus/poke.png'
+                picture : 'http://paper-face.com/cttoronto/faceboculus/poke.jpg'
             };
 
             FB.api('/' + friendId + '/feed', 'post', opts, function(response)
             {
+              console.log(response);
                 if (!response || response.error)
                 {
                     alert('Posting error occured');
@@ -134,9 +110,47 @@ if ($user) {
             });
       }
 
-      <?php if ($user) { ?>
-          grabFriends();
-        <? } ?>
+
+      function PostOnFriendsWall(friendId)
+      {
+
+
+        // var access_token=document.getElementById("access_token").value;
+        // var sendername=document.getElementById("sendername").value;
+        // status1 = document.getElementById('message').value;
+        // var facebookid = document.getElementsByName("facebookid");
+        FB.api(
+          "/" + friendId + "/feed",
+          "POST",
+          {
+              
+                  "message": "You have been poked!!!!",
+                  "from": token.id,
+                  // "to": friendId,
+                  "picture": "http://paper-face.com/cttoronto/faceboculus/poke.jpg",
+                  "caption": "POKE",
+                  "description": "brought to you by FaceBoculus"
+              
+          },
+          function (response) {
+             console.log(response);
+            if (response && !response.error) {
+              /* handle the result */
+                 console.log("success");
+            }
+          }
+      );
+        
+        // FB.api('/' + friendId + '/feed', 'POST', publish, function(response) {alert("posted");});
+    } 
+
+
+     (function() {
+        var e = document.createElement('script'); e.async = true;
+        e.src = document.location.protocol +
+          '//connect.facebook.net/en_US/all.js';
+        document.getElementById('fb-root').appendChild(e);
+      }());
     </script>
   </body>
 </html>

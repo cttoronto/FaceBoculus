@@ -34,10 +34,7 @@
 		</style>
 	</head>
 	<body>
-		<script src="../lib/vr.js"></script>
 		<script src="../third_party/three.js/three.js"></script>
-		<script src="js/controls/OculusRiftControls.js"></script>
-		<script src="js/effects/OculusRiftEffect.js"></script>
 		<script src="js/CTT/CTT_FBStickman.js"></script>
 
     <div id="help">Move this window to your Rift (use the Windows key + arrows to get it there fast) then hit 'f' to make it fullscreen.</div>
@@ -47,42 +44,19 @@
 		(function() {
 			var camera, scene, renderer;
 			var geometry, material, mesh;
-			var controls, time = Date.now();
+			var time = Date.now();
 
-			var effect; // rift effect
-
-			var object_faces = new Array();
+			var objects = [];
 
 			var ray;
-			var person;
-			var sphere;
-			
+			var sphere;		
 			var plane_floor;
-
-			
-			if (!vr.isInstalled()) {
-				//statusEl.innerText = 'NPVR plugin not installed!';
-				alert('NPVR plugin not installed!');
-			}
-			vr.load(function(error) {
-				if (error) {
-					//statusEl.innerText = 'Plugin load failed: ' + error.toString();
-					alert('Plugin load failed: ' + error.toString());
-				}
-
-				try {
-					init();
-					animate();
-				} catch (e) {
-					//statusEl.innerText = e.toString();
-					console.log(e);
-				}
-			});
+			var test_plane;
 
 			function init() {
 
 				camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 1000 );
-				camera.position.y = 100;
+				camera.position.y = 10;
 				scene = new THREE.Scene();
 				scene.fog = new THREE.Fog( 0xffffff, 0, 750 );
 
@@ -94,8 +68,6 @@
 				light.position.set( -1, - 0.5, -1 );
 				scene.add( light );
 
-				controls = new THREE.OculusRiftControls( camera );
-				scene.add( controls.getObject() );
 
 				// var cameraHelper = new THREE.CameraHelper(camera);
 				// scene.add(cameraHelper);
@@ -126,118 +98,82 @@
 
 				}
 
+				
 				material = new THREE.MeshBasicMaterial( { vertexColors: THREE.VertexColors } );
-
+material.side = THREE.DoubleSide;
 				plane_floor = new THREE.Mesh( geometry, material );
 				scene.add( plane_floor );
 				
-				geometry = new THREE.SphereGeometry(20,12,12);
+				geometry = new THREE.SphereGeometry(5,24,12);
 				sphere = new THREE.Mesh(geometry);
+				sphere.position = {x: 0, y: 20, z: -10};
 				scene.add(sphere);
-				
-				for (var i = 0; i < 10; i ++){	
-					person = new CTT_FBStickman();
-					scene.add(person.model());
-					person.model().position.x = Math.random()*1000-500;
-					person.model().rotation.y = Math.random()*360 *Math.PI/180;
-					person.model().position.z = Math.random()*1000-500;
-					//alert(person.face());
-					object_faces.push(person.facemesh());
-				}
+
+
+				geometry = new THREE.PlaneGeometry( 10, 10, 1, 1 );
+				material = new THREE.MeshBasicMaterial( { 
+					color: 0xf0f000, 
+					shading: THREE.FlatShading,
+					vertexColors: THREE.VertexColors 
+				});
+				test_plane = new THREE.Mesh(geometry, material);
+				scene.add(test_plane);
+				test_plane.position = {x: 0, y: 20, z: -50};
+
 				renderer = new THREE.WebGLRenderer({
 					devicePixelRatio: 1,
 					alpha: false,
 					clearColor: 0xffffff,
 					antialias: true
 				});
+				
+				
 
-				effect = new THREE.OculusRiftEffect( renderer );
-
-				document.getElementById('ipd').innerHTML =
-						effect.getInterpupillaryDistance().toFixed(3);
+				renderer.setSize( window.innerWidth, window.innerHeight );
 
 				document.body.appendChild( renderer.domElement );
-
-				//
 
 				window.addEventListener( 'resize', onWindowResize, false );
 				document.addEventListener( 'keydown', keyPressed, false );
 			}
-
+			
+			init();
+			animate();
 			function onWindowResize() {
+				renderer.setSize( window.innerWidth, window.innerHeight );
 			}
 
 			function keyPressed (event) {
-				switch ( event.keyCode ) {
-					case 79: // o
-						effect.setInterpupillaryDistance(
-								effect.getInterpupillaryDistance() - 0.001);
-						document.getElementById('ipd').innerHTML =
-								effect.getInterpupillaryDistance().toFixed(3);
-						break;
-					case 80: // p
-						effect.setInterpupillaryDistance(
-								effect.getInterpupillaryDistance() + 0.001);
-						document.getElementById('ipd').innerHTML =
-								effect.getInterpupillaryDistance().toFixed(3);
-						break;
-
-					case 70: // f
-						if (!vr.isFullScreen()) {
-							vr.enterFullScreen();
-						} else {
-							vr.exitFullScreen();
-						}
-						e.preventDefault();
-						break;
-
-					case 32: // space
-						vr.resetHmdOrientation();
-						e.preventDefault();
-						break;
-				}
 			}
 
-			var vrstate = new vr.State();
+			function render() {
+				
+				renderer.render( scene, camera );
+			}
 			function animate() {
-				vr.requestAnimationFrame(animate);
-
-				controls.isOnObject( false );
-
-				ray.ray.origin.copy( controls.getObject().position );
-				ray.ray.origin.y -= 10;
-
-				var intersections = ray.intersectObjects( object_faces );
-				if ( intersections.length > 0 ) {
-					var distance = intersections[ 0 ].distance;
-					if ( distance > 0 && distance < 10 ) {
-						controls.isOnObject( true );
-					}
-				}
-
-				// Poll VR, if it's ready.
-				var polled = vr.pollState(vrstate);
-				controls.update( Date.now() - time, polled ? vrstate : null );
-
-				//renderer.render( scene, camera );
-				effect.render( scene, camera, polled ? vrstate : null );
 
 				time = Date.now();
-//				sphere.position = controls.getObject().position.clone();
-//				sphere.position.z -= 10;
+				
+				requestAnimationFrame( animate );
+
+				render();
+				
+				/*-----------------------------------*/	
 				var collide_ray = new THREE.Raycaster(sphere.position);
 				collide_ray.ray.direction.set( 0, 0, -1 );
 
-				var collisions = collide_ray.intersectObjects( object_faces );
+				var collisions = collide_ray.intersectObjects( [test_plane] );
 				
 				if ( collisions.length > 0 ) {
 					var distance = collisions[ 0 ].distance;
 					
-					console.log(distance, collisions[0].object);
+						console.log(distance, collisions[0].object);
 					if ( distance > 0 && distance < 10 ) {
 					}
 				}
-				/**/
+//				sphere.position.x-= 0.1;
+				sphere.position.z-= 0.1;
+//				camera.position.z += 0.1;
 			}
 		})();
 		</script>

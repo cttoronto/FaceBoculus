@@ -1,15 +1,16 @@
-var CTT_FBStickman = function($facepath, $color){
-				if (!$color){
-					 $color = 0x3b5998;
+var CTT_FBStickman = function($persondata){
+				if (!$persondata["color"]){
+					 $persondata["color"] = 0x3b5998;
 				}
-				if (!$facepath){
-					 $facepath = "profile.jpg";
+				if (!$persondata["image"]){
+					 $persondata["image"] = "profile.jpg";
 				}
+				this.data = $persondata;
 				this.stickman = new THREE.Object3D();//create an empty container
 				//scene.add( person );//when done, add the group to the scene
 
 				material = new THREE.MeshBasicMaterial( { 
-					color: $color, 
+					color: $persondata["color"], 
 					shading: THREE.FlatShading,
 					vertexColors: THREE.VertexColors 
 				});
@@ -42,9 +43,10 @@ var CTT_FBStickman = function($facepath, $color){
 				stickman_leg_r.rotation.z = stickman_arm_r.rotation.z = -20*Math.PI/180
 				
 				geometry = new THREE.PlaneGeometry(30,30,1,1);
-				material = new THREE.MeshLambertMaterial({ map: THREE.ImageUtils.loadTexture($facepath) });
+				material = new THREE.MeshLambertMaterial({ map: THREE.ImageUtils.loadTexture($persondata["image"]) });
 				material.side = THREE.DoubleSide;
 				this.face = new THREE.Mesh(geometry, material);
+				this.face.data = this.data;
 				this.stickman.add(this.face);
 				this.face.position = {x: 0, y: 137, z: 0};
 }
@@ -52,5 +54,8 @@ CTT_FBStickman.prototype.model = function(){
 	return this.stickman;
 }
 CTT_FBStickman.prototype.facemesh = function(){
-	return this.face;
+	return {face:this.face, data:this.data};
+}
+CTT_FBStickman.prototype.data = function(){
+	return this.data;
 }

@@ -135,15 +135,7 @@
 				sphere = new THREE.Mesh(geometry);
 				scene.add(sphere);
 				
-				for (var i = 0; i < 10; i ++){	
-					person = new CTT_FBStickman();
-					scene.add(person.model());
-					person.model().position.x = Math.random()*1000-500;
-					person.model().rotation.y = Math.random()*360 *Math.PI/180;
-					person.model().position.z = Math.random()*1000-500;
-					//alert(person.face());
-					object_faces.push(person.facemesh());
-				}
+				
 				renderer = new THREE.WebGLRenderer({
 					devicePixelRatio: 1,
 					alpha: false,
@@ -162,6 +154,8 @@
 
 				window.addEventListener( 'resize', onWindowResize, false );
 				document.addEventListener( 'keydown', keyPressed, false );
+				
+				populatePeople([{image:"texture.png"}, {image:"profile.jpg"}, {image:"profile.jpg"}, {image:"profile.jpg"}, {image:"profile.jpg"}]);
 			}
 
 			function onWindowResize() {
@@ -197,7 +191,17 @@
 						break;
 				}
 			}
-
+			function populatePeople($people){
+				var person;
+				for (var i = 0; i < $people.length; i ++){	
+					person = new CTT_FBStickman($people[i]);
+					scene.add(person.model());
+					person.model().position.x = Math.random()*1000-500;
+					person.model().rotation.y = Math.random()*360 *Math.PI/180;
+					person.model().position.z = Math.random()*1000-500;
+					object_faces.push(person.facemesh().face);
+				}				
+			}
 			var vrstate = new vr.State();
 			function animate() {
 				vr.requestAnimationFrame(animate);
@@ -225,6 +229,7 @@
 				time = Date.now();
 //				sphere.position = controls.getObject().position.clone();
 //				sphere.position.z -= 10;
+
 				var collide_ray = new THREE.Raycaster(sphere.position);
 				collide_ray.ray.direction.set( 0, 0, -1 );
 
@@ -232,12 +237,18 @@
 				
 				if ( collisions.length > 0 ) {
 					var distance = collisions[ 0 ].distance;
-					
-					console.log(distance, collisions[0].object);
+					//console.log(distance, collisions[0].object);
 					if ( distance > 0 && distance < 10 ) {
+						onPoke(collisions[0].object.data);
 					}
 				}
 				/**/
+			}
+			function onPoke($data){
+				//FB MAGIC GOES HERE
+				//HEY MARC
+				//HERE
+				//DON'T FORGET TO PUBLISH	
 			}
 		})();
 		</script>

@@ -21,7 +21,7 @@ if ($user) {
       $PottersFriends[] = (object) array(
           'name' =>$value['name'],
           'id' =>$value['id'],
-          'picture' =>"http://graph.facebook.com/" . $value['id'] . "/picture"
+          'image' =>"http://graph.facebook.com/" . $value['id'] . "/picture"
         );
     }
 
@@ -239,7 +239,7 @@ if ($user) {
 				
 				geometry = new THREE.SphereGeometry(20,12,12);
 				sphere = new THREE.Mesh(geometry);
-				scene.add(sphere);
+				// scene.add(sphere);
 				
 				
 				renderer = new THREE.WebGLRenderer({

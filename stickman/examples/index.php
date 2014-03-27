@@ -42,7 +42,7 @@ if ($user) {
        
 
   } catch (FacebookApiException $e) {
-    echo '<pre>'.htmlspecialchars(print_r($e, true)).'</pre>';
+    // echo '<pre>'.htmlspecialchars(print_r($e, true)).'</pre>';
     $user = null;
   }
 }
@@ -79,7 +79,7 @@ if ($user) {
 				top: 0;
 				left: 0;
 			}
-			#login { position: fixed; z-index: 1000; }
+			#login { position: fixed; z-index: 1000; color: #fff; }
 
 		</style>
 	</head>
@@ -502,7 +502,7 @@ if ($user) {
 	                // "to": { "name": friendName, "id": friendId },
 	                // "message_tags": [{ "name": friendName, "id": friendId, "offset": 46, "length": friendName.length }],
 	                // "tags": $data.id,
-	                "picture": "http://paper-face.com/cttoronto/faceboculus/poke.jpg",
+	                "picture": "http://paper-face.com/cttoronto/faceboculus/poke.png",
 	                "caption": "POKE",
 	                "description": "Brought to you by FaceBoculus and the Creative Technologists of Toronto"
 	                // "app_id": "<?php echo $facebook->getAppID() ?>"
